@@ -70,6 +70,18 @@ var PORT = process.env.NODE_ENV || 3000;
 
 var app = express();
 
+//config view engine to render EJS templates
+app.set('views', __dirname + '/views');
+app.set('view engine', 'ejs');
+
+//using middleware for common functionality
+//ie logging, parsing, sess handling
+
+app.use(require('morgan')('combined'));
+app.use(require('cookie-parser')());
+app.use(require('body-parser').urlencoded({ extended: true }));
+app.use(require('express-session')({ secret: 'minecraft', resave: false, saveUninitialized: false }));
+
 
 
 app.use(session({
