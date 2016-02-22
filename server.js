@@ -82,7 +82,9 @@ app.use(require('cookie-parser')());
 app.use(require('body-parser').urlencoded({ extended: true }));
 app.use(require('express-session')({ secret: 'minecraft', resave: false, saveUninitialized: false }));
 
-
+//init passport and restore auth state if any from sess
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use(session({
         secret: "this is a secret",
