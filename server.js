@@ -86,6 +86,32 @@ app.use(require('express-session')({ secret: 'minecraft', resave: false, saveUni
 app.use(passport.initialize());
 app.use(passport.session());
 
+//defining routes
+app.get('/',
+  function(req,res) {
+    res.render('home', { user: req.user });
+  });
+app.get('/login',
+  function(req,res) {
+    res.render('login');
+  });
+app.post('/login',
+  passport.authenticate('local', { failureRedirect: '/login' }),
+  function(req, res) {
+    res.redirect('/');
+  });
+app.get('/logout',
+  function(req,res) {
+    req.logout();
+    res.redirect('/');
+  });
+app.get('/profile',
+  require('connect-ensure-login').ensureLoggedIn(),
+  function(req, res) {
+    res.render('profile', { user: req.user });
+  });
+app.listen(3000);   
+
 app.use(session({
         secret: "this is a secret",
         cookie: {
