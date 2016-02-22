@@ -3,6 +3,7 @@ var expressHandlebars = require('express-handlebars');
 var mysql = require('mysql');
 var bodyParser = require('body-parser');
 var session = require('express-session');
+
 var Sequelize = require('sequelize');
 var sequelize = new Sequelize('my_class', 'root');
 
@@ -10,7 +11,7 @@ var bcryptjs = require('bcryptjs');
 
 var passport = require('passport');
 var Strategy = require('passport-local').Strategy;
-var db = require('./db');
+
 
 //config local strategy for passport
 //the local strategy needs a verify function that
@@ -89,7 +90,7 @@ app.use(passport.session());
 //defining routes
 app.get('/',
   function(req,res) {
-    res.render('home', { user: req.user });
+    res.render('index', { user: req.user });
   });
 app.get('/login',
   function(req,res) {
@@ -110,7 +111,7 @@ app.get('/profile',
   function(req, res) {
     res.render('profile', { user: req.user });
   });
-app.listen(3000);   
+//app.listen(3000);   
 
 app.use(session({
         secret: "this is a secret",
@@ -177,15 +178,9 @@ app.get('/secret', function(req,res) {
       }
 });
 
-app.get('/students', function(req,res) {
-  Student.findall({
-    include: [{
-      model: Role
-    }]
-  }).then(function(students) {
-    res.render('student', {
-      students: students
-    })
+app.get('/students', function (req, res) {
+  Students.put(req.body).then(function() {
+    res.redirect('/students');
   });
 });
 
@@ -195,12 +190,33 @@ app.post('/students', function(req, res) {
   });
 });
 
-app.post('/roles/:StudentId', function(req,res) {
-  Role.create({
+app.post('/:StudentId', function(req,res) {
+    create({
     studentname: req.body.studentname,
-    actorId: req.params.StudentId
+    studentId: req.params.StudentId
   }).then(function() {
     res.redirect('/students');
+  });
+});
+
+app.get('/instructors', function (req, res) {
+  Instructors.put(req.body).then(function() {
+    res.redirect('/instructors');
+  });
+});
+
+app.post('/instructors', function(req, res) {
+  Instructor.create(req.body).then(function() {
+    res.redirect('/instructors');
+  });
+});
+
+app.post('/:InstructorId', function(req,res) {
+    create({
+    instructorname: req.body.instructorname,
+    instructorId: req.params.InstructorId
+  }).then(function() {
+    res.redirect('/instructors');
   });
 });
 
