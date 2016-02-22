@@ -26,6 +26,21 @@ passport.use(new Strategy(
     });
   }));
 
+//config passport authenticated session persistence
+//passport must serialize users into and deserialize users out of
+//the session. just supply user ID when serializing and query the 
+//user record by ID from the db when deserializing
+
+passport.serializeUser(function(user, cb) {
+  cb(null, user.id);
+});
+
+passport.deserializeUser(function(id, cb) {
+  db.users.findById(id, function (err, user) {
+    if (err) { return cb(err); }
+    cb(null, user);
+  });
+});
 
 var User = sequelize.define('user', {
     email: {
@@ -54,6 +69,8 @@ Instructor.hasMany(Student);
 var PORT = process.env.NODE_ENV || 3000;
 
 var app = express();
+
+
 
 app.use(session({
         secret: "this is a secret",
