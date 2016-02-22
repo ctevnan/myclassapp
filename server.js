@@ -197,9 +197,13 @@ app.post('/students', function(req, res) {
 
 app.post('/roles/:StudentId', function(req,res) {
   Role.create({
+    studentname: req.body.studentname,
+    actorId: req.params.StudentId
+  }).then(function() {
+    res.redirect('/students');
+  });
+});
 
-  })
-}
 sequelize.sync().then(function() {
         app.listen(PORT, function() {
                  console.log("Listening on port %s, PORT");
