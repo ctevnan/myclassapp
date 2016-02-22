@@ -4,7 +4,28 @@ var mysql = require('mysql');
 var bodyParser = require('body-parser');
 var session = require('express-session');
 var Sequelize = require('sequelize');
-var sequelize = new Sequelize('test_my_class_db', 'root');
+var sequelize = new Sequelize('my_class', 'root');
+
+var bcryptjs = require('bcryptjs');
+
+var passport = require('passport');
+var Strategy = require('passport-local').Strategy;
+var db = require('./db');
+
+//config local strategy for passport
+//the local strategy needs a verify function that
+//gets the credentials given by the user (username,psswrd)
+
+passport.use(new Strategy(
+  function(username, password, cb) {
+    db.users.findByUsername(username, function(err, user) {
+      if (err) { return cb(err); }
+      if (!user) { return cb(null, false); }
+      if (user.password != password) { return cb(null, false); }
+      return cb(null, user);
+    });
+  }));
+
 
 var User = sequelize.define('user', {
     email: {
@@ -16,12 +37,26 @@ var User = sequelize.define('user', {
   lastname: Sequelize.STRING,  
 });
 
+var Student = sequelize.define('student', {
+    firstname: Sequelize.STRING,
+    lastname: Sequelize.STRING,
+});
+//students have 1 instructor and up to 2 TAs.
+
+var Instructor = sequelize.define('instructor', {
+    firstname: Sequelize.STRING,
+    lastname: Sequelize.STRING,
+});
+
+Instructor.hasMany(Student);
+//an instructor can be either a TA or a teacher
+
 var PORT = process.env.NODE_ENV || 3000;
 
 var app = express();
 
 app.use(session({
-        secret: "This is a secret.",
+        secret: "this is a secret",
         cookie: {
                 maxAge: 1000 * 60 * 60 * 24 *14
         },
@@ -85,6 +120,29 @@ app.get('/secret', function(req,res) {
       }
 });
 
+app.get('/students', function(req,res) {
+  Student.findall({
+    include: [{
+      model: Role
+    }]
+  }).then(function(students) {
+    res.render('student', {
+      students: students
+    })
+  });
+});
+
+app.post('/students', function(req, res) {
+  Student.create(req.body).then(function() {
+    res.redirect('/students');
+  });
+});
+
+app.post('/roles/:StudentId', function(req,res) {
+  Role.create({
+
+  })
+}
 sequelize.sync().then(function() {
         app.listen(PORT, function() {
                  console.log("Listening on port %s, PORT");
